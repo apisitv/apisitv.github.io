@@ -129,7 +129,7 @@
     }
 
     .hero {
-      grid-column: 1 / 3;
+      grid-column: 1 / 4;
       grid-row: 2;
       min-height: 640px;
       position: relative;
@@ -140,7 +140,7 @@
 
     .hero-stage {
       position: relative;
-      width: min(820px, 100%);
+      width: min(980px, calc(100vw - 320px));
       min-height: 640px;
       display: grid;
       place-items: center;
@@ -161,9 +161,9 @@
 
     .hero-arc {
       position: absolute;
-      left: 18%;
+      left: 22%;
       top: 10%;
-      width: 56%;
+      width: 48%;
       height: 72%;
       border-radius: 50%;
       border: 1.5px solid rgba(87, 87, 87, 0.16);
@@ -181,27 +181,20 @@
       display: grid;
       place-items: center;
       isolation: isolate;
+      border-radius: 36px;
     }
 
-    .video-shell::before {
-      content: "";
-      position: absolute;
-      inset: 8% 12% 12%;
-      border-radius: 34px;
-      background:
-        radial-gradient(circle at 50% 24%, rgba(255, 246, 228, 0.92) 0%, rgba(255, 241, 214, 0.52) 34%, rgba(255, 241, 214, 0) 68%),
-        linear-gradient(180deg, rgba(249, 246, 240, 0.9) 0%, rgba(243, 239, 232, 0.36) 100%);
-      z-index: -1;
-      filter: blur(1px);
-    }
-
-    .video-shell video {
+    .model-canvas {
       width: 100%;
       height: 100%;
-      object-fit: contain;
       display: block;
-      mix-blend-mode: screen;
-      filter: brightness(1.06) contrast(1.08) saturate(1.02) drop-shadow(0 18px 28px rgba(0, 0, 0, 0.14));
+      border-radius: 36px;
+      cursor: grab;
+      filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.14));
+    }
+
+    .model-canvas:active {
+      cursor: grabbing;
     }
 
     .video-fallback {
@@ -223,7 +216,7 @@
       display: flex;
     }
 
-    .video-shell.is-fallback video {
+    .video-shell.is-fallback .model-canvas {
       opacity: 0;
       pointer-events: none;
     }
@@ -262,7 +255,7 @@
 
     .nav-cluster {
       position: absolute;
-      left: 2%;
+      left: 11%;
       top: 18%;
       width: min(300px, 36%);
       display: flex;
@@ -309,7 +302,7 @@
 
     .icon-rail {
       position: absolute;
-      left: 33%;
+      left: 32%;
       top: 18%;
       display: flex;
       flex-direction: column;
@@ -573,12 +566,12 @@
       font-size: 0.93rem;
     }
 
-    .video-shell.is-switching video {
+    .video-shell.is-switching .model-canvas {
       opacity: 0.82;
       transform: scale(0.988);
     }
 
-    .video-shell video {
+    .video-shell .model-canvas {
       transition: opacity 180ms ease, transform 180ms ease;
     }
 
@@ -638,14 +631,15 @@
 
       .hero-stage {
         min-height: 580px;
+        width: min(900px, calc(100vw - 260px));
       }
 
       .nav-cluster {
-        left: 0;
+        left: 7%;
       }
 
       .icon-rail {
-        left: 36%;
+        left: 31%;
       }
     }
 
@@ -684,11 +678,11 @@
       }
 
       .nav-cluster {
-        left: 1%;
+        left: 6%;
       }
 
       .icon-rail {
-        left: 39%;
+        left: 32%;
       }
     }
 
@@ -717,8 +711,8 @@
       }
 
       .hero-arc {
-        left: 12%;
-        width: 76%;
+        left: 18%;
+        width: 62%;
         height: 64%;
       }
 
@@ -788,15 +782,13 @@
         <div class="nav-cluster" id="navCluster" aria-label="Sections" role="tablist" aria-orientation="vertical"></div>
         <div class="icon-rail" id="iconRail" aria-hidden="true"></div>
         <div class="video-shell">
-          <video id="heroVideo" autoplay muted loop playsinline preload="auto">
-            <source src="./one_no_bg.mp4" type="video/mp4">
-          </video>
+          <canvas class="model-canvas" id="heroCanvas" aria-label="3D model viewer"></canvas>
           <div class="video-fallback" id="videoFallback">
-            <p>Preview mode is active. This slot is ready for section-based video switching when more clips are added.</p>
+            <p>3D preview is unavailable right now. The viewer is ready to use once the model can be loaded successfully.</p>
           </div>
           <div class="video-status" id="videoStatus" aria-live="polite">
             <span class="video-dot" aria-hidden="true"></span>
-            <span id="videoStatusText">Loading motion preview...</span>
+            <span id="videoStatusText">Loading 3D preview...</span>
           </div>
         </div>
         <p class="nav-help">Use click, Enter, or arrow keys to switch sections.</p>
@@ -834,7 +826,20 @@
     </nav>
   </main>
 
-  <script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from "three";
+    import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+    import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
     const sections = [
       {
         id: "frontend",
@@ -842,7 +847,7 @@
         heading: "Frontend Engineer",
         title: "Interfaces that feel fast, clear, and intentional",
         description: "This section is the default hero state. It focuses on interface design, component architecture, and the interaction quality that makes a product feel finished.",
-        videoSrc: "./one_no_bg.mp4",
+        modelSrc: "./idle_one.glb",
         layout: "highlights",
         icon: "monitor",
         meta: ["UI Systems", "Interaction Detail", "Responsive Design"],
@@ -865,7 +870,7 @@
         heading: "System Architecture",
         title: "From screen-level concerns to product structure",
         description: "Use this state to explain how the frontend fits into a larger system: modules, integration boundaries, and delivery decisions.",
-        videoSrc: "./one_no_bg.mp4",
+        modelSrc: "./idle_one.glb",
         layout: "highlights",
         icon: "spark",
         meta: ["Scalable Frontend", "Integration Boundaries", "Pattern Layer"],
@@ -888,7 +893,7 @@
         heading: "Application Logic",
         title: "State, switching, and behavior live here",
         description: "The left menu, central media, and right card all depend on the same state. This section is where the interaction model is explained.",
-        videoSrc: "./one_no_bg.mp4",
+        modelSrc: "./idle_one.glb",
         layout: "highlights",
         icon: "crown",
         meta: ["State Flow", "UI Behavior", "View Coordination"],
@@ -911,7 +916,7 @@
         heading: "Data & Analytics",
         title: "A place for metrics, outcomes, and signal",
         description: "This panel can shift from timeline content to decision-support content without changing the base shell of the UI.",
-        videoSrc: "./one_no_bg.mp4",
+        modelSrc: "./idle_one.glb",
         layout: "highlights",
         icon: "mute",
         meta: ["Decision Support", "Behavior Signal", "Readable Summaries"],
@@ -934,7 +939,7 @@
         heading: "Experience",
         title: "Relevant roles arranged as a readable timeline",
         description: "This is the timeline card matching the original concept. It remains one of several view modes for the right-side panel.",
-        videoSrc: "./one_no_bg.mp4",
+        modelSrc: "./idle_one.glb",
         layout: "timeline",
         icon: "stack",
         meta: ["Career Snapshot", "Timeline View", "Readable Density"],
@@ -978,11 +983,219 @@
     const panelBody = document.getElementById("panelBody");
     const panelBadge = document.getElementById("panelBadge");
     const panelMeta = document.getElementById("panelMeta");
-    const heroVideo = document.getElementById("heroVideo");
     const videoShell = document.querySelector(".video-shell");
     const panelRoot = document.getElementById("panelRoot");
     const videoStatusText = document.getElementById("videoStatusText");
+    const heroCanvas = document.getElementById("heroCanvas");
     const STORAGE_KEY = "resume-active-section";
+
+    let renderer;
+    let scene;
+    let camera;
+    let controls;
+    let mixer;
+    let activeModel;
+    let activeAssetPath = null;
+    const clock = new THREE.Clock();
+    let resizeObserver;
+
+    function setViewerState(state, text) {
+      videoShell.classList.toggle("is-loading", state === "loading");
+      videoShell.classList.toggle("is-fallback", state === "fallback");
+      videoStatusText.textContent = text;
+    }
+
+    function initThree() {
+      renderer = new THREE.WebGLRenderer({
+        canvas: heroCanvas,
+        alpha: true,
+        antialias: true
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(0x000000, 0);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+
+      scene = new THREE.Scene();
+
+      camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+      camera.position.set(0, 1.2, 6.2);
+
+      controls = new OrbitControls(camera, heroCanvas);
+      controls.enablePan = false;
+      controls.enableZoom = false;
+      controls.enableDamping = true;
+      controls.enableRotate = true;
+      controls.target.set(0, 1.0, 0);
+      controls.minAzimuthAngle = -0.45;
+      controls.maxAzimuthAngle = 0.45;
+      controls.minPolarAngle = 1.05;
+      controls.maxPolarAngle = 1.65;
+
+      const ambient = new THREE.AmbientLight(0xffffff, 1.45);
+      scene.add(ambient);
+
+      const hemiLight = new THREE.HemisphereLight(0xfff6e7, 0xd7d2cb, 1.35);
+      hemiLight.position.set(0, 4, 0);
+      scene.add(hemiLight);
+
+      const keyLight = new THREE.DirectionalLight(0xffffff, 2.1);
+      keyLight.position.set(2.8, 5.5, 4.5);
+      scene.add(keyLight);
+
+      const fillLight = new THREE.DirectionalLight(0xfff4de, 1.1);
+      fillLight.position.set(-3.5, 2.8, 3.2);
+      scene.add(fillLight);
+
+      const rimLight = new THREE.DirectionalLight(0xdde6ff, 1.15);
+      rimLight.position.set(-2.2, 2, -3.2);
+      scene.add(rimLight);
+
+      const groundGlow = new THREE.PointLight(0xfff2dd, 1.2, 18);
+      groundGlow.position.set(0, 0.8, 3.5);
+      scene.add(groundGlow);
+
+      const floor = new THREE.Mesh(
+        new THREE.CircleGeometry(2.1, 64),
+        new THREE.MeshBasicMaterial({ color: 0xe4dfd8, transparent: true, opacity: 0.35 })
+      );
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.set(0, -1.55, 0);
+      scene.add(floor);
+
+      resizeRenderer();
+      window.addEventListener("resize", resizeRenderer);
+      resizeObserver = new ResizeObserver(() => resizeRenderer());
+      resizeObserver.observe(heroCanvas.parentElement);
+      animate();
+    }
+
+    function resizeRenderer() {
+      const bounds = heroCanvas.parentElement.getBoundingClientRect();
+      const width = Math.max(Math.floor(bounds.width), 320);
+      const height = Math.max(Math.floor(bounds.height), 420);
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    }
+
+    function frameModel(model) {
+      const box = new THREE.Box3().setFromObject(model);
+      const size = new THREE.Vector3();
+      const center = new THREE.Vector3();
+      box.getSize(size);
+      box.getCenter(center);
+
+      const pivot = new THREE.Group();
+      pivot.add(model);
+      scene.add(pivot);
+
+      model.position.set(-center.x, -box.min.y, -center.z);
+
+      const normalizedBox = new THREE.Box3().setFromObject(pivot);
+      const normalizedSize = new THREE.Vector3();
+      const normalizedCenter = new THREE.Vector3();
+      normalizedBox.getSize(normalizedSize);
+      normalizedBox.getCenter(normalizedCenter);
+
+      const targetHeight = 3.5;
+      const scale = targetHeight / normalizedSize.y;
+      pivot.scale.setScalar(scale);
+
+      const scaledBox = new THREE.Box3().setFromObject(pivot);
+      const scaledSize = new THREE.Vector3();
+      const scaledCenter = new THREE.Vector3();
+      scaledBox.getSize(scaledSize);
+      scaledBox.getCenter(scaledCenter);
+
+      const halfHeight = scaledSize.y * 0.5;
+      const halfWidth = scaledSize.x * 0.5;
+      const verticalFov = THREE.MathUtils.degToRad(camera.fov);
+      const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect);
+      const fitHeightDistance = halfHeight / Math.tan(verticalFov * 0.5);
+      const fitWidthDistance = halfWidth / Math.tan(horizontalFov * 0.5);
+      const distance = Math.max(fitHeightDistance, fitWidthDistance) * 1.55;
+
+      pivot.position.set(0, -scaledBox.min.y - 1.55, 0);
+      pivot.rotation.y = 0.02;
+
+      controls.target.set(0, scaledCenter.y * 0.58, 0);
+      camera.position.set(0, scaledCenter.y * 0.62, distance);
+      controls.update();
+
+      activeModel = pivot;
+    }
+
+    async function loadModel(assetPath) {
+      if (!assetPath || assetPath === activeAssetPath) return;
+
+      setViewerState("loading", "Loading 3D preview...");
+      videoShell.classList.add("is-switching");
+
+      if (activeModel) {
+        scene.remove(activeModel);
+        activeModel.traverse((child) => {
+          if (child.isMesh) {
+            child.geometry?.dispose?.();
+            if (Array.isArray(child.material)) {
+              child.material.forEach((material) => material.dispose?.());
+            } else {
+              child.material?.dispose?.();
+            }
+          }
+        });
+        activeModel = null;
+      }
+
+      const loader = new GLTFLoader();
+
+      try {
+        const gltf = await loader.loadAsync(assetPath);
+        activeAssetPath = assetPath;
+        const modelScene = gltf.scene;
+
+        modelScene.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = false;
+            child.receiveShadow = false;
+            if (child.material) {
+              child.material.side = THREE.FrontSide;
+            }
+          }
+        });
+
+        frameModel(modelScene);
+
+        if (gltf.animations && gltf.animations.length) {
+          mixer = new THREE.AnimationMixer(activeModel);
+          const action = mixer.clipAction(gltf.animations[0]);
+          action.play();
+        } else {
+          mixer = null;
+        }
+
+        setViewerState("ready", "3D preview ready");
+      } catch (error) {
+        activeAssetPath = null;
+        mixer = null;
+        console.error(error);
+        setViewerState("fallback", "3D model failed to load. Try opening this page through a local server.");
+      } finally {
+        window.setTimeout(() => {
+          videoShell.classList.remove("is-switching");
+        }, 220);
+      }
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const delta = clock.getDelta();
+      mixer?.update(delta);
+      controls?.update();
+      renderer?.render(scene, camera);
+    }
 
     let activeSectionId = window.localStorage.getItem(STORAGE_KEY) || "experience";
 
@@ -1114,28 +1327,9 @@
       panelBody.appendChild(view);
     }
 
-    function syncVideo(section) {
-      const nextSrc = section.videoSrc || "./one_no_bg.mp4";
-      const currentSrc = heroVideo.currentSrc || heroVideo.querySelector("source")?.src || "";
-      videoShell.classList.add("is-switching");
-      videoShell.classList.add("is-loading");
-      videoShell.classList.remove("is-fallback");
-      videoStatusText.textContent = `Loading motion preview for ${section.label}...`;
-
-      if (!currentSrc.endsWith(nextSrc.replace("./", ""))) {
-        heroVideo.pause();
-        heroVideo.src = nextSrc;
-        heroVideo.load();
-      }
-
-      heroVideo.play().catch(() => {
-        videoShell.classList.add("is-fallback");
-        videoStatusText.textContent = "Motion preview unavailable. Fallback mode is active.";
-      });
-
-      window.setTimeout(() => {
-        videoShell.classList.remove("is-switching");
-      }, 220);
+    function syncHeroAsset(section) {
+      const nextModel = section.modelSrc || "./idle_one.glb";
+      loadModel(nextModel);
     }
 
     function setActiveSection(sectionId, options = {}) {
@@ -1144,30 +1338,14 @@
       renderNav();
       renderPanel();
       const section = sections.find((entry) => entry.id === sectionId) || sections[0];
-      syncVideo(section);
+      syncHeroAsset(section);
 
       if (options.focusButton) {
         document.getElementById(`tab-${sectionId}`)?.focus();
       }
     }
 
-    heroVideo.addEventListener("loadeddata", () => {
-      videoShell.classList.remove("is-loading");
-      videoShell.classList.remove("is-fallback");
-      videoStatusText.textContent = "Motion preview ready";
-    });
-
-    heroVideo.addEventListener("canplay", () => {
-      videoShell.classList.remove("is-loading");
-      videoStatusText.textContent = "Motion preview ready";
-    });
-
-    heroVideo.addEventListener("error", () => {
-      videoShell.classList.remove("is-loading");
-      videoShell.classList.add("is-fallback");
-      videoStatusText.textContent = "Video failed to load. Fallback mode is active.";
-    });
-
+    initThree();
     setActiveSection(activeSectionId);
   </script>
 </body>
