@@ -174,7 +174,7 @@
             position: absolute;
             left: 50%;
             bottom: 0;
-            width: clamp(360px, 30vw, 460px);
+            width: clamp(390px, 32vw, 560px);
             aspect-ratio: 9 / 16;
             z-index: 2;
             display: grid;
@@ -686,7 +686,7 @@
             }
 
             .video-shell {
-                width: clamp(270px, 48vw, 360px);
+                width: clamp(270px, 48vw, 460px);
                 transform: translateX(-50%) translateY(20px);
             }
 
@@ -851,7 +851,8 @@
                 heading: "Frontend Engineer",
                 title: "Interfaces that feel fast, clear, and intentional",
                 description: "This section is the default hero state. It focuses on interface design, component architecture, and the interaction quality that makes a product feel finished.",
-                modelSrc: "./idle_one.glb",
+                modelSrc: "./idle_two.glb",
+                animationClip: "Personalized_Gesture",
                 layout: "highlights",
                 icon: "monitor",
                 meta: ["UI Systems", "Interaction Detail", "Responsive Design"],
@@ -874,7 +875,8 @@
                 heading: "System Architecture",
                 title: "From screen-level concerns to product structure",
                 description: "Use this state to explain how the frontend fits into a larger system: modules, integration boundaries, and delivery decisions.",
-                modelSrc: "./idle_one.glb",
+                modelSrc: "./idle_two.glb",
+                animationClip: "Mirror_Viewing",
                 layout: "highlights",
                 icon: "spark",
                 meta: ["Scalable Frontend", "Integration Boundaries", "Pattern Layer"],
@@ -897,7 +899,8 @@
                 heading: "Application Logic",
                 title: "State, switching, and behavior live here",
                 description: "The left menu, central media, and right card all depend on the same state. This section is where the interaction model is explained.",
-                modelSrc: "./idle_one.glb",
+                modelSrc: "./idle_two.glb",
+                animationClip: "Victory_Fist_Pump",
                 layout: "highlights",
                 icon: "crown",
                 meta: ["State Flow", "UI Behavior", "View Coordination"],
@@ -920,7 +923,8 @@
                 heading: "Data & Analytics",
                 title: "A place for metrics, outcomes, and signal",
                 description: "This panel can shift from timeline content to decision-support content without changing the base shell of the UI.",
-                modelSrc: "./idle_one.glb",
+                modelSrc: "./idle_two.glb",
+                animationClip: "Archery_Aim_with_Lateral_Scan",
                 layout: "highlights",
                 icon: "mute",
                 meta: ["Decision Support", "Behavior Signal", "Readable Summaries"],
@@ -943,7 +947,8 @@
                 heading: "Experience",
                 title: "Relevant roles arranged as a readable timeline",
                 description: "This is the timeline card matching the original concept. It remains one of several view modes for the right-side panel.",
-                modelSrc: "./idle_one.glb",
+                modelSrc: "./idle_two.glb",
+                animationClip: "Hello_Run",
                 layout: "timeline",
                 icon: "stack",
                 meta: ["Career Snapshot", "Timeline View", "Readable Density"],
@@ -1001,15 +1006,55 @@
         let camera;
         let controls;
         let mixer;
+        let clipActions = new Map();
+        let currentAction = null;
+        let idleAction = null;
         let activeModel;
         let activeAssetPath = null;
         const clock = new THREE.Clock();
         let resizeObserver;
+        // const IDLE_CLIP_NAME = "Idle_13";
+        const IDLE_CLIP_NAME = "Mirror_Viewing";
 
         function setViewerState(state, text) {
             videoShell.classList.toggle("is-loading", state === "loading");
             videoShell.classList.toggle("is-fallback", state === "fallback");
             videoStatusText.textContent = text;
+        }
+
+        function fadeToAction(nextAction, fadeDuration = 0.22) {
+            if (!nextAction || currentAction === nextAction) return;
+
+            const previousAction = currentAction;
+            currentAction = nextAction;
+            currentAction.reset().fadeIn(fadeDuration).play();
+
+            if (previousAction) {
+                previousAction.fadeOut(fadeDuration);
+            }
+        }
+
+        function playIdleAnimation() {
+            if (!idleAction) return;
+
+            idleAction.enabled = true;
+            idleAction.setLoop(THREE.LoopRepeat, Infinity);
+            idleAction.clampWhenFinished = false;
+            fadeToAction(idleAction);
+        }
+
+        function playSectionAnimation(clipName) {
+            const nextAction = clipActions.get(clipName);
+            if (!nextAction) {
+                playIdleAnimation();
+                return;
+            }
+
+            nextAction.enabled = true;
+            nextAction.setLoop(THREE.LoopOnce, 1);
+            nextAction.clampWhenFinished = true;
+            nextAction.reset();
+            fadeToAction(nextAction, 0.18);
         }
 
         function initThree() {
@@ -1106,7 +1151,7 @@
             normalizedBox.getSize(normalizedSize);
             normalizedBox.getCenter(normalizedCenter);
 
-            const targetHeight = 4.85;
+            const targetHeight = 3.5;
             const scale = targetHeight / normalizedSize.y;
             pivot.scale.setScalar(scale);
 
@@ -1122,9 +1167,9 @@
             const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect);
             const fitHeightDistance = halfHeight / Math.tan(verticalFov * 0.5);
             const fitWidthDistance = halfWidth / Math.tan(horizontalFov * 0.5);
-            const distance = Math.max(fitHeightDistance, fitWidthDistance) * 1.08;
+            const distance = Math.max(fitHeightDistance, fitWidthDistance) * 0.75;
 
-            pivot.position.set(0, -scaledBox.min.y - 1.32, 0);
+            pivot.position.set(0, -scaledBox.min.y - 1.2, 0);
             pivot.rotation.y = 0.02;
 
             controls.target.set(0, scaledCenter.y * 0.46, 0);
@@ -1155,6 +1200,15 @@
                 activeModel = null;
             }
 
+            if (mixer) {
+                mixer.stopAllAction();
+                mixer = null;
+            }
+
+            clipActions = new Map();
+            currentAction = null;
+            idleAction = null;
+
             const loader = new GLTFLoader();
 
             try {
@@ -1174,10 +1228,27 @@
 
                 frameModel(modelScene);
 
+                const animationNames = (gltf.animations || []).map((clip, index) => clip.name || `unnamed_${index}`);
+                window.__modelAnimationNames = animationNames;
+                console.log("[resume] Loaded model:", assetPath);
+                console.log("[resume] Animation names:", animationNames);
+
                 if (gltf.animations && gltf.animations.length) {
                     mixer = new THREE.AnimationMixer(activeModel);
-                    const action = mixer.clipAction(gltf.animations[0]);
-                    action.play();
+                    gltf.animations.forEach((clip, index) => {
+                        const clipName = clip.name || `unnamed_${index}`;
+                        clipActions.set(clipName, mixer.clipAction(clip));
+                    });
+
+                    mixer.addEventListener("finished", (event) => {
+                        if (event.action !== idleAction) {
+                            playIdleAnimation();
+                        }
+                    });
+
+
+                    idleAction = clipActions.get(IDLE_CLIP_NAME) || clipActions.get(animationNames[0]) || null;
+                    playIdleAnimation();
                 } else {
                     mixer = null;
                 }
@@ -1396,7 +1467,7 @@
         }
 
         function syncHeroAsset(section) {
-            const nextModel = section.modelSrc || "./idle_one.glb";
+            const nextModel = section.modelSrc || "./idle_two.glb";
             loadModel(nextModel);
         }
 
@@ -1408,6 +1479,14 @@
             const section = sections.find((entry) => entry.id === sectionId) || sections[0];
             syncHeroAsset(section);
 
+            if (options.playAnimation !== false) {
+                if (activeAssetPath === section.modelSrc) {
+                    playSectionAnimation(section.animationClip);
+                } else {
+                    window.setTimeout(() => playSectionAnimation(section.animationClip), 280);
+                }
+            }
+
             if (options.focusButton) {
                 document.getElementById(`tab-${sectionId}`)?.focus();
             }
@@ -1415,7 +1494,7 @@
 
         initThree();
         window.addEventListener("resize", () => window.requestAnimationFrame(layoutArcItems));
-        setActiveSection(activeSectionId);
+        setActiveSection(activeSectionId, { playAnimation: false });
     </script>
 </body>
 
