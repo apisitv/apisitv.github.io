@@ -1,0 +1,21 @@
+:root {
+  --bg: #f4f2ef;
+  --bg-warm: rgba(255, 236, 209, 0.72);
+  --surface: rgba(255, 255, 255, 0.7);
+  --surface-strong: rgba(255, 255, 255, 0.9);
+  --surface-muted: rgba(248, 247, 244, 0.95);
+  --text: #161616;
+  --text-soft: #5f5f5f;
+  --text-faint: #8e8e8e;
+  --border: rgba(21, 21, 21, 0.08);
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.08);
+  --shadow-soft: 0 16px 36px rgba(0, 0, 0, 0.06);
+  --active: #171717;
+  --accent: #0050c4;
+  --radius-xl: 34px;
+  --radius-lg: 26px;
+  --radius-md: 20px;
+  --radius-pill: 999px;
+  --page-padding: clamp(20px, 3vw, 44px);
+  --font: "Segoe UI", "Inter", system-ui, sans-serif;
+}

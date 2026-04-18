@@ -1,0 +1,77 @@
+.page {
+  position: relative;
+  z-index: 1;
+  height: 100dvh;
+  padding: var(--page-padding) var(--page-padding) 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  align-items: center;
+  overflow: hidden;
+}
+
+.identity {
+  position: absolute;
+  top: var(--page-padding);
+  left: var(--page-padding);
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 2px;
+}
+
+.hero {
+  grid-column: 1;
+  height: calc(100dvh - var(--page-padding));
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+}
+
+.hero-stage {
+  position: relative;
+  width: 100%;
+  max-width: 1320px;
+  height: min(820px, calc(100dvh - var(--page-padding)));
+  display: grid;
+  place-items: stretch;
+}
+
+.panel {
+  position: absolute;
+  right: clamp(20px, 5vw, 84px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(255, 255, 255, 0.66);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  max-height: calc(100dvh - (var(--page-padding) * 2) - 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: clamp(320px, 40vw, 500px);
+  overflow: hidden;
+}
+
+.social {
+  position: absolute;
+  left: var(--page-padding);
+  bottom: var(--page-padding);
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.66);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(14px);
+  width: fit-content;
+}

@@ -5,20 +5,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apisit Vijit - Portfolio</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon.ico">
+    <link rel="stylesheet" href="./css/tokens.css">
+    <link rel="stylesheet" href="./css/base.css">
+    <link rel="stylesheet" href="./css/layout.css">
+    <link rel="stylesheet" href="./css/components.css">
+    <link rel="stylesheet" href="./css/responsive.css">
 </head>
 
 <body>
     <main class="page">
         <section class="identity" aria-label="Profile">
-            <!-- <img src="apisit.png" alt="Apisit Profile" class="avatar"> -->
             <div class="avatar-container">
-                <img src="apisit.png" alt="Apisit Profile" class="avatar-img">
+                <img src="./assets/images/apisit.png" alt="Apisit Profile" class="avatar-img" id="identityAvatar">
             </div>
             <div>
-                <h1>Apisit Vijit</h1>
-                <p>Software engineer</p>
+                <h1 id="identityName">Apisit Vijit</h1>
+                <p id="identityRole">Software engineer</p>
             </div>
         </section>
 
@@ -96,7 +99,7 @@
       }
     }
   </script>
-    <script type="module" src="script.js"></script>
+    <script type="module" src="./js/main.js"></script>
 </body>
 
 </html>
