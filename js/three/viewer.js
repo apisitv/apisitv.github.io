@@ -111,12 +111,29 @@ export class HeroViewer {
         color: 0xe4dfd8,
         transparent: true,
         opacity: 0.42,
+        depthWrite: true,
       }),
     );
     floor.rotation.x = -Math.PI / 2;
     floor.position.set(0, -1.55, 0);
     floor.receiveShadow = true;
+    floor.renderOrder = 1;
+    floor.visible = false; // ปิดฐานยืน
     this.scene.add(floor);
+
+    const shadowPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(8, 8),
+      new THREE.ShadowMaterial({
+        transparent: true,
+        opacity: 0.1,
+        depthWrite: false,
+      }),
+    );
+    shadowPlane.rotation.x = -Math.PI / 2;
+    shadowPlane.position.set(0, -1.57, 0);
+    shadowPlane.receiveShadow = true;
+    shadowPlane.renderOrder = 0;
+    this.scene.add(shadowPlane);
   }
 
   resizeRenderer() {
