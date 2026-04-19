@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-const IDLE_CLIP_NAME = "Mirror_Viewing";
+const IDLE_CLIP_NAME = "Slow_Walk_Reload"
 
 export class HeroViewer {
   constructor(refs) {
@@ -152,7 +152,7 @@ export class HeroViewer {
       2 * Math.atan(Math.tan(verticalFov / 2) * this.camera.aspect);
     const fitHeightDistance = halfHeight / Math.tan(verticalFov * 0.5);
     const fitWidthDistance = halfWidth / Math.tan(horizontalFov * 0.5);
-    const distance = Math.max(fitHeightDistance, fitWidthDistance) * 0.8;
+    const distance = Math.max(fitHeightDistance, fitWidthDistance) * 1.25;
 
     pivot.position.set(0, -scaledBox.min.y - 1.4, 0);
     pivot.rotation.y = 0.02;
