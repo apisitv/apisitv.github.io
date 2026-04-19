@@ -18,8 +18,7 @@ body {
   position: relative;
 }
 
-body::before,
-body::after {
+body::before {
   content: "";
   position: fixed;
   inset: auto;
@@ -35,14 +34,6 @@ body::before {
   width: 42vw;
   height: 42vw;
   background: radial-gradient(circle, rgba(255, 227, 188, 0.88) 0%, rgba(255, 227, 188, 0.18) 45%, rgba(255, 227, 188, 0) 72%);
-}
-
-body::after {
-  bottom: 6%;
-  left: 24%;
-  width: 52vw;
-  height: 12vw;
-  background: radial-gradient(circle, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0) 68%);
 }
 
 .sr-only {

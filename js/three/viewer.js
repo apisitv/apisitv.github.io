@@ -41,6 +41,8 @@ export class HeroViewer {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 0.72;
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     this.scene = new THREE.Scene();
 
@@ -77,6 +79,16 @@ export class HeroViewer {
 
     const keyLight = new THREE.DirectionalLight(0xffffff, 1.55);
     keyLight.position.set(2.8, 5.5, 4.5);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 1024;
+    keyLight.shadow.mapSize.height = 1024;
+    keyLight.shadow.camera.near = 0.5;
+    keyLight.shadow.camera.far = 20;
+    keyLight.shadow.camera.left = -4;
+    keyLight.shadow.camera.right = 4;
+    keyLight.shadow.camera.top = 4;
+    keyLight.shadow.camera.bottom = -4;
+    keyLight.shadow.bias = -0.0008;
     this.scene.add(keyLight);
 
     const fillLight = new THREE.DirectionalLight(0xfff4de, 0.72);
@@ -94,15 +106,16 @@ export class HeroViewer {
 
   setupFloor() {
     const floor = new THREE.Mesh(
-      new THREE.CircleGeometry(2.1, 64),
-      new THREE.MeshBasicMaterial({
+      new THREE.CircleGeometry(2.35, 64),
+      new THREE.MeshPhongMaterial({
         color: 0xe4dfd8,
         transparent: true,
-        opacity: 0.35,
+        opacity: 0.42,
       }),
     );
     floor.rotation.x = -Math.PI / 2;
     floor.position.set(0, -1.55, 0);
+    floor.receiveShadow = true;
     this.scene.add(floor);
   }
 
@@ -154,7 +167,7 @@ export class HeroViewer {
     const fitWidthDistance = halfWidth / Math.tan(horizontalFov * 0.5);
     const distance = Math.max(fitHeightDistance, fitWidthDistance) * 1.25;
 
-    pivot.position.set(0, -scaledBox.min.y - 1.4, 0);
+    pivot.position.set(0, -scaledBox.min.y - 1.6, 0);
     pivot.rotation.y = 0.02;
 
     this.controls.target.set(0, scaledCenter.y * 0.46, 0);
@@ -242,6 +255,8 @@ export class HeroViewer {
       modelScene.traverse((child) => {
         if (child.isMesh && child.material) {
           child.material.side = THREE.FrontSide;
+          child.castShadow = true;
+          child.receiveShadow = true;
 
           if ("metalness" in child.material) child.material.metalness = 0.05;
           if ("roughness" in child.material) child.material.roughness = 0.92;
