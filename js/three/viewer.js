@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-const IDLE_CLIP_NAME = "Slow_Walk_Reload"
+const IDLE_CLIP_NAME = "Slow_Walk_Reload";
 
 export class HeroViewer {
   constructor(refs) {
@@ -40,7 +40,7 @@ export class HeroViewer {
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.88;
+    this.renderer.toneMappingExposure = 0.72;
 
     this.scene = new THREE.Scene();
 
@@ -68,10 +68,10 @@ export class HeroViewer {
   }
 
   setupLights() {
-    const ambient = new THREE.AmbientLight(0xffffff, 0.95);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.75);
     this.scene.add(ambient);
 
-    const hemiLight = new THREE.HemisphereLight(0xfff6e7, 0xd7d2cb, 0.9);
+    const hemiLight = new THREE.HemisphereLight(0xfff6e7, 0xd7d2cb, 0.7);
     hemiLight.position.set(0, 4, 0);
     this.scene.add(hemiLight);
 
@@ -242,6 +242,12 @@ export class HeroViewer {
       modelScene.traverse((child) => {
         if (child.isMesh && child.material) {
           child.material.side = THREE.FrontSide;
+
+          if ("metalness" in child.material) child.material.metalness = 0.05;
+          if ("roughness" in child.material) child.material.roughness = 0.92;
+          if ("envMapIntensity" in child.material) {
+            child.material.envMapIntensity = 0.2;
+          }
         }
       });
 
