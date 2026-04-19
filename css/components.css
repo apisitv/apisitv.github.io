@@ -62,7 +62,7 @@
   place-items: center;
   isolation: isolate;
   border-radius: 36px;
-  transform: translateX(-50%) translateY(120px);
+  transform: translateX(-50%) translateY(100px);
 }
 
 .model-canvas {
@@ -110,7 +110,7 @@
   position: absolute;
   left: 50%;
   bottom: 8%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(-120px);
   display: inline-flex;
   align-items: center;
   gap: 8px;

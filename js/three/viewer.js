@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-const IDLE_CLIP_NAME = "Mirror_Viewing";
+const IDLE_CLIP_NAME = "Slow_Walk_Reload";
 
 export class HeroViewer {
   constructor(refs) {
@@ -40,7 +40,9 @@ export class HeroViewer {
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.88;
+    this.renderer.toneMappingExposure = 0.72;
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     this.scene = new THREE.Scene();
 
@@ -68,15 +70,25 @@ export class HeroViewer {
   }
 
   setupLights() {
-    const ambient = new THREE.AmbientLight(0xffffff, 0.95);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.75);
     this.scene.add(ambient);
 
-    const hemiLight = new THREE.HemisphereLight(0xfff6e7, 0xd7d2cb, 0.9);
+    const hemiLight = new THREE.HemisphereLight(0xfff6e7, 0xd7d2cb, 0.7);
     hemiLight.position.set(0, 4, 0);
     this.scene.add(hemiLight);
 
     const keyLight = new THREE.DirectionalLight(0xffffff, 1.55);
     keyLight.position.set(2.8, 5.5, 4.5);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 1024;
+    keyLight.shadow.mapSize.height = 1024;
+    keyLight.shadow.camera.near = 0.5;
+    keyLight.shadow.camera.far = 20;
+    keyLight.shadow.camera.left = -4;
+    keyLight.shadow.camera.right = 4;
+    keyLight.shadow.camera.top = 4;
+    keyLight.shadow.camera.bottom = -4;
+    keyLight.shadow.bias = -0.0008;
     this.scene.add(keyLight);
 
     const fillLight = new THREE.DirectionalLight(0xfff4de, 0.72);
@@ -94,16 +106,34 @@ export class HeroViewer {
 
   setupFloor() {
     const floor = new THREE.Mesh(
-      new THREE.CircleGeometry(2.1, 64),
-      new THREE.MeshBasicMaterial({
+      new THREE.CircleGeometry(2.35, 64),
+      new THREE.MeshPhongMaterial({
         color: 0xe4dfd8,
         transparent: true,
-        opacity: 0.35,
+        opacity: 0.42,
+        depthWrite: true,
       }),
     );
     floor.rotation.x = -Math.PI / 2;
     floor.position.set(0, -1.55, 0);
+    floor.receiveShadow = true;
+    floor.renderOrder = 1;
+    floor.visible = false; // ปิดฐานยืน
     this.scene.add(floor);
+
+    const shadowPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(8, 8),
+      new THREE.ShadowMaterial({
+        transparent: true,
+        opacity: 0.1,
+        depthWrite: false,
+      }),
+    );
+    shadowPlane.rotation.x = -Math.PI / 2;
+    shadowPlane.position.set(0, -1.57, 0);
+    shadowPlane.receiveShadow = true;
+    shadowPlane.renderOrder = 0;
+    this.scene.add(shadowPlane);
   }
 
   resizeRenderer() {
@@ -152,9 +182,9 @@ export class HeroViewer {
       2 * Math.atan(Math.tan(verticalFov / 2) * this.camera.aspect);
     const fitHeightDistance = halfHeight / Math.tan(verticalFov * 0.5);
     const fitWidthDistance = halfWidth / Math.tan(horizontalFov * 0.5);
-    const distance = Math.max(fitHeightDistance, fitWidthDistance) * 0.8;
+    const distance = Math.max(fitHeightDistance, fitWidthDistance) * 1.25;
 
-    pivot.position.set(0, -scaledBox.min.y - 1.4, 0);
+    pivot.position.set(0, -scaledBox.min.y - 1.6, 0);
     pivot.rotation.y = 0.02;
 
     this.controls.target.set(0, scaledCenter.y * 0.46, 0);
@@ -242,6 +272,14 @@ export class HeroViewer {
       modelScene.traverse((child) => {
         if (child.isMesh && child.material) {
           child.material.side = THREE.FrontSide;
+          child.castShadow = true;
+          child.receiveShadow = true;
+
+          if ("metalness" in child.material) child.material.metalness = 0.05;
+          if ("roughness" in child.material) child.material.roughness = 0.92;
+          if ("envMapIntensity" in child.material) {
+            child.material.envMapIntensity = 0.2;
+          }
         }
       });
 
